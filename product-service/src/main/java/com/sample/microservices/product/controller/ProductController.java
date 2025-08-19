@@ -6,9 +6,11 @@ import com.sample.microservices.product.model.Product;
 import com.sample.microservices.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/product")
@@ -31,6 +33,12 @@ public class ProductController {
     public List<ProductResponse> getAllProduct(){
         return productService.getAllProduct();
 
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public Boolean deleteProduct(@PathVariable String id){
+        return productService.deleteProductById(id);
     }
 
 }

@@ -23,12 +23,16 @@ public class OrderService {
 
         boolean inStock = inventoryClient.isInStock(orderRequest.skuCode(), orderRequest.quantity());
 
-        if (inStock){
+        if (!inStock){
+            throw new RuntimeException("Product with skuCode"+ orderRequest.skuCode() + "is not in stock");
+        }
+
+        var reserveResponse = inventoryClient.reserve(orderRequest.skuCode(), orderRequest.quantity());
+        if (reserveResponse.getStatusCode().is2xxSuccessful()) {
             var order = mapToOrder(orderRequest);
             orderRepository.save(order);
-        }
-        else{
-            throw new RuntimeException("Product with skuCode"+ orderRequest.skuCode() + "is not in stock");
+        } else {
+            throw new RuntimeException("Failed to reserve inventory for skuCode " + orderRequest.skuCode());
         }
     }
 

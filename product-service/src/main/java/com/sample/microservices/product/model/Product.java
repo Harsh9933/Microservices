@@ -1,9 +1,7 @@
 package com.sample.microservices.product.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -12,7 +10,7 @@ import java.math.BigDecimal;
 @Document(value = "product")
 public class Product {
     @Id
-    private String id;
+    private ObjectId id;
     private String name;
     private String description;
     private BigDecimal price;
@@ -21,7 +19,7 @@ public class Product {
     public Product() {}
 
     // All-Args Constructor
-    public Product(String id, String name, String description, BigDecimal price) {
+    public Product(ObjectId id, String name, String description, BigDecimal price) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -29,8 +27,8 @@ public class Product {
     }
 
     // Getters and Setters
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public ObjectId getId() { return id; }
+    public void setId(ObjectId id) { this.id = id; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -43,12 +41,12 @@ public class Product {
 
     // Builder Pattern
     public static class Builder {
-        private String id;
+        private ObjectId id;
         private String name;
         private String description;
         private BigDecimal price;
 
-        public Builder id(String id) {
+        public Builder id(ObjectId id) {
             this.id = id;
             return this;
         }
