@@ -1,0 +1,104 @@
+name: microservices
+services:
+  eureka:
+    build: ./service-registery
+    container_name: eureka
+    ports:
+      - "8761:8761"
+
+  gateway:
+    build: ./gateway
+    container_name: gateway
+    depends_on:
+      - eureka
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka
+      - EUREKA_INSTANCE_PREFER_IP_ADDRESS=true
+      - SPRING_PROFILES_ACTIVE=docker
+    ports:
+      - "8088:8088"
+
+  product-service:
+    build: ./product-service
+    container_name: product-service
+    depends_on:
+      - eureka
+      - mongo
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka
+      - SPRING_DATA_MONGODB_URI=mongodb://root:password@mongo:27017/product-service?authSource=admin
+      - EUREKA_INSTANCE_PREFER_IP_ADDRESS=true
+    ports:
+      - "8080:8080"
+
+  inventory-service:
+    build: ./inventory-service
+    container_name: inventory-service
+    depends_on:
+      - eureka
+      - postgres-inventory
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-inventory:5432/inventory
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=root
+      - EUREKA_INSTANCE_PREFER_IP_ADDRESS=true
+    ports:
+      - "8082:8082"
+
+  order-service:
+    build: ./order-service
+    container_name: order-service
+    depends_on:
+      - eureka
+      - postgres-order
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-order:5432/order_service
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=root
+      - EUREKA_INSTANCE_PREFER_IP_ADDRESS=true
+    ports:
+      - "8081:8081"
+
+  postgres-inventory:
+    image: postgres:latest
+    container_name: postgres-inventory
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+    volumes:
+      - ./inventory-service/psql/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - pgdata_inventory:/var/lib/postgresql/data
+    ports:
+      - "5430:5432"
+
+  postgres-order:
+    image: postgres:latest
+    container_name: postgres-order
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+    volumes:
+      - ./order-service/docker/postgresql/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - pgdata_order:/var/lib/postgresql/data
+    ports:
+      - "5431:5432"
+
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: product-service
+    volumes:
+      - mongodata:/data/db
+    ports:
+      - "27017:27017"
+
+volumes:
+  pgdata_inventory: {}
+  pgdata_order: {}
+  mongodata: {}
+
