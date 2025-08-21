@@ -11,20 +11,51 @@ spring:
           uri: lb://product-service
           predicates:
             - Path=/api/product/**
+        - id: product-openapi
+          uri: lb://product-service
+          predicates:
+            - Path=/openapi/product
+          filters:
+            - SetPath=/v3/api-docs
         - id: inventory
           uri: lb://inventory-service
           predicates:
             - Path=/api/inventory/**
+        - id: inventory-openapi
+          uri: lb://inventory-service
+          predicates:
+            - Path=/openapi/inventory
+          filters:
+            - SetPath=/v3/api-docs
         - id: order
           uri: lb://order-service
           predicates:
             - Path=/api/order/**
+        - id: order-openapi
+          uri: lb://order-service
+          predicates:
+            - Path=/openapi/order
+          filters:
+            - SetPath=/v3/api-docs
       globalcors:
         corsConfigurations:
           "[/**]":
             allowedOrigins: "*"
             allowedMethods: "*"
             allowedHeaders: "*"
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+      - name: product-service
+        url: /openapi/product
+      - name: inventory-service
+        url: /openapi/inventory
+      - name: order-service
+        url: /openapi/order
 
 eureka:
   client:
